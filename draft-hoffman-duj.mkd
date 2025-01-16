@@ -1,0 +1,176 @@
+---
+title: DNS Update with JSON
+abbrev: DNS Update with JSON
+docname: draft-hoffman-duj-00
+ipr: trust200902
+submissiontype: IETF
+cat: std
+
+author:
+  -
+    ins: P. Hoffman
+    name: Paul Hoffman
+    organization: ICANN
+    email: paul.hoffman@icann.org
+
+normative:
+  RFC1035:
+  RFC3597:
+  RFC7493:
+
+informative:
+  RFC7208:
+  RFC8552:
+  I-D.kowalik-domainconnect:
+  DomainConnect:
+    title: DomainConnect
+    target: https://www.domainconnect.org/
+    date: false
+  TYPES-REGISTRY:
+    title: Domain Name System (DNS) Parameters
+    target: https://www.iana.org/assignments/dns-parameters/
+    date: false
+
+--- abstract
+
+It is common for service providers such as certificate authorities and social media providers to want users to update the users' zones to prove that they control those zones, or to add other features.
+Currently, service providers tell users to do this using human language describing the resource record type and data values to enter into the zone.
+This document describes a text format, called "DNS update with JSON" or "DUJ", for such a service provider to give to a user, with the expectation that the user would paste (or possibly type) the text to their DNS operator to update the user's zone.
+DNS operators who know how to handle DUJ strings will make the update process easier and more predictable for their users.
+
+--- middle
+
+# Introduction
+
+There are many scenarios where someone gives instructions to a human to update their DNS zone in order to prove that they control those zones, or to add other features.
+For example, someone suggesting that you add an SPF {{RFC7208}} record to a zone might say "add a TXT record with the value "v=spf1 a:mail.yourname.example ip4:192.0.2.49" to your zone".
+The expectation is that you are either able to edit your zone file directly and understand the format of the records, or you use a DNS operator who has an interface for you to be able to add and modify records in your zone.
+
+This document proposes a method for giving a human a string that can be copy-and-pasted, or typed by hand if needed, that gives a precise update for a zone.
+The protocol, called "DNS update with JSON" or "DUJ", specifies a string format in I-JSON {{RFC7493}} that represents the addition and deletion of records in a DNS zone.
+It is designed for DNS operators who accept strings in their interface for zone updates.
+The format self-identifies a string as DUJ, and the protocol lists what is and is not acceptable for DUJ strings.
+Using DUJ makes the update process more reliable for DNS operators and their users.
+
+## DUJ Use Case
+
+DUJ is specifically targeted at improving the current common scenario of a user being told by an application service or a helpful friend to modify their DNS zone.
+DUJ is not intended for any automatic zone updates.
+
+Different, more elaborate protocols for automatic updates, may be proposed separately.
+For example, DomainConnect ({{DomainConnect}}, {{I-D.kowalik-domainconnect}}) defines an automated protocol that includes user affirmation before updates.
+DUJ is purposely more limited and less less ambitious than those protocols, with the assumption that it will be much easier to deploy.
+
+## BCP 14 Language
+
+{::boilerplate bcp14-tagged}
+
+# Specification
+
+An example of a DUJ string is:
+
+~~~
+["DUJ", [["add", "mail.yourname.example", "TXT",
+ "v=spf1 a:mail.yourname.example ip4:192.0.2.49"]]
+~~~
+
+A DUJ string MUST be a JSON array with two values. The first value is the string "DUJ".
+The second value is a an array, called the "update array", which lists all the updates.
+The update array MUST have a length of at least 1.
+
+The arrays in the update array are called "action templates".
+Every action template is an array of at least four values: "action", "FQDN", "RRtype", and "Rdata".
+
+## Action
+
+The action is a string specifying the action to be taken.
+The action string MUST be either "add" or "delete"; no other values are allowed.
+
+## FQDN
+
+The FQDN is a string that is a fully-qualified domain name.
+The FQDN string MUST NOT have a trailing period.
+
+Note that the FQDN might be a zone that does not yet exist because it is being created by an "add" action.
+A common example of this is adding an "underscore name" {{RFC8552}} such as "_smimecert" and "_xmpp".
+
+## RRtype
+
+The RRtype is a string with the name of the resource record type for the action.
+The RRtype's name is given in the "TYPE" column of the "Resource Record (RR) TYPEs" IANA registry {{TYPES-REGISTRY}}.
+
+To specify an RRtype that is not yet in the registry, use the format specified in {{RFC3597}}.
+For example:
+
+~~~
+["DUJ", [["add", "yourname.example", "TYPE4321", "\# 4 0A000001"]]
+~~~
+
+#Rdata
+
+Rdata consists of one or more strings that with the record's data.
+The strings are expressed in the same manner as the display format defined for the RRtype.
+If there is no data for the record, this is specified with an empty string ("").
+
+Some RRtypes require multiple character-strings, where "character-string" is defined in Section 5.1 of {{RFC1035}}.
+In such a case, each character-string is a separate JSON string.
+For example:
+
+~~~
+["DUJ", [["add", "yourname.example", "WALLET", "ETH",
+  "0xb775599c76b4672B0D820E3AA534F7cF9312c263"]]
+~~~
+
+# Processing
+
+This section defines rules for DNS operators who allow updates with DUJ to process DUJ strings they receive.
+
+The update array is an ordered list of action templates.
+The DNS operator MUST process each action template in the order it appears in the update array.
+However, the DNS operator does so only after verifying all the contents of the DUJ string.
+
+The DNS operator SHOULD be able to handle {{RFC3597}} RRtypes.
+However, they may have a local policy to not allow users to add or delete unknown RRtypes.
+
+A DNS operator MAY reject any DUJ string for any reason.
+If the DUJ was received from a user interface, the DNS operator SHOULD clearly describe why a DUJ was rejected.
+
+## String Verification
+
+The DNS operator MUST not process any DUJ string where any of the following rules are not met:
+
+- The DUJ string MUST be valid I-JSON.
+- The first element of the DUJ string MUST be "DUJ".
+- The update array MUST have at least one action template.
+- Every action template MUST meet the following rules:
+  - There MUST be four or more elements
+  - The action element MUST be either the exact string "add" or "delete"
+  - The FQDN MUST be a valid fully-qualified domain name
+  - The FQDN MUST NOT end with "."
+  - The RRtype MUST be recognized, or be in the format specified in {{RFC3597}}
+  - The Rdata MUST be appropriate for the given RRtype
+
+## Action Processing
+
+After verifying the DUJ string, the DNS operator processes each action template in order.
+When processing an action template, the DNS operator MUST verify:
+
+- that the  user is authorized to change the zone named in the FQDN
+- that, for "delete" actions, that the exact record described in the action template exists
+- that, for "add" actions, that the exact record described in the action template does not already exist
+
+A DNS operator SHOULD tell a user about every change made from a DUJ.
+
+# IANA Considerations
+
+This document contains no actions for IANA.
+
+# Security Considerations
+
+By design, a DUJ has no cryptographic protection.
+It is, by design, only as secure and the current common scenario where a service tells a user to manually type some data (the RRtype and Rdata values) into an interface run by the DNS operator.
+
+When a service gives the user a DUJ string, the authenticity of the source of the DUJ string and the integrity of the DUJ string is only as strong as the user's connection to the service.
+When a user pastes or types a DUJ string to a DNS operator, the authenticity of the source of the DUJ string and the integrity of the DUUS is only as strong as the user's connection to the DNS operator.
+
+--- back
