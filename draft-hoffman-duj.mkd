@@ -35,7 +35,7 @@ informative:
 
 It is common for service providers such as certificate authorities and social media providers to want users to update the users' zones to prove that they control those zones, or to add other features.
 Currently, service providers tell users to do this using human language describing the resource record type and data values to enter into the zone.
-This document describes a text format, called "DNS update with JSON" or "DUJ", for such a service provider to give to a user, with the expectation that the user would paste (or possibly type) the text to their DNS operator to update the user's zone.
+This document describes a text format, called "DNS update with JSON" or "DUJ", for such a service provider to give to a user, with the expectation that the user would copy and paste the text to their DNS operator to update the user's zone.
 DNS operators who know how to handle DUJ strings will make the update process easier and more predictable for their users.
 
 --- middle
@@ -46,20 +46,40 @@ There are many scenarios where someone gives instructions to a human to update t
 For example, someone suggesting that you add an SPF {{RFC7208}} record to a zone might say "add a TXT record with the value "v=spf1 a:mail.yourname.example ip4:192.0.2.49" to your zone".
 The expectation is that you are either able to edit your zone file directly and understand the format of the records, or you use a DNS operator who has an interface for you to be able to add and modify records in your zone.
 
-This document proposes a method for giving a human a string that can be copy-and-pasted, or typed by hand if needed, that gives a precise update for a zone.
+This document proposes a method for giving a human a string that can be copy-and-pasted to give a precise update for a zone.
 The protocol, called "DNS update with JSON" or "DUJ", specifies a string format in I-JSON {{RFC7493}} that represents the addition and deletion of records in a DNS zone.
 It is designed for DNS operators who accept strings in their interface for zone updates.
 The format self-identifies a string as DUJ, and the protocol lists what is and is not acceptable for DUJ strings.
 Using DUJ makes the update process more reliable for DNS operators and their users.
 
-## DUJ Use Case
+## DUJ Use Case {#use-case}
 
 DUJ is specifically targeted at improving the current common scenario of a user being told by an application service or a helpful friend to modify their DNS zone.
 DUJ is not intended for any automatic zone updates.
 
+DUJ is intended only for users who copy-and-paste.
+DUJ strings can be typed by users, but doing so can easily introduce errors that might negatively affect their DNS zone.
+Because DUJ strings contain quoted text, and some typing systems might automatically unhelpfully convert quotation marks into "smart quotes", for some users typing DUJ strings might be impossible.
+
 Different, more elaborate protocols for automatic updates, may be proposed separately.
 For example, DomainConnect ({{DomainConnect}}, {{I-D.kowalik-domainconnect}}) defines an automated protocol that includes user affirmation before updates.
 DUJ is purposely more limited and less less ambitious than those protocols, with the assumption that it will be much easier to deploy.
+Service providers might allow manual updates as they do today, manual updates by DUJ, and automated updates with a protocol like DomainConnect.
+
+## DUJ Design {#design}
+
+This format is explicitly only meant for the use cases in {{use-case}}.
+If the designer of an automated protocol is thinking of re-using DUJ in that protocol, they should not.
+DUJ is specifically designed for copy-and-paste by end users.
+It would be trivial to design a better format for describing automated DNS updates.
+
+The design choice to use JSON arrays instead of objects is to increase security and reliability.
+This is to prevent key-value pairs to be added that might cause users or operators to possibly process the DUJ strings incorrectly or to misinterpret them.
+For example, it is not possible to include comments in a DUJ string such as "For DKIM".
+The reason for this is that such comments could be used by an attacker to convince a user to make a change that they otherwise might not by adding a comment such as "Urgent security update".
+
+Another explicit design for DUJ is that it is not extensible.
+If there is a reason to create a later version, the first string can be changed to one that includes a new version identifier.
 
 ## BCP 14 Language
 
@@ -93,6 +113,8 @@ The FQDN string MUST NOT have a trailing period.
 
 Note that the FQDN might be a zone that does not yet exist because it is being created by an "add" action.
 A common example of this is adding an "underscore name" {{RFC8552}} such as "_smimecert" and "_xmpp".
+
+The FQDN MUST NOT contain a wildcard.
 
 ## RRtype
 
@@ -147,6 +169,7 @@ The DNS operator MUST not process any DUJ string where any of the following rule
   - The action element MUST be either the exact string "add" or "delete"
   - The FQDN MUST be a valid fully-qualified domain name
   - The FQDN MUST NOT end with "."
+  - The FQDN MUST NOT contain a wildcard
   - The RRtype MUST be recognized, or be in the format specified in {{RFC3597}}
   - The Rdata MUST be appropriate for the given RRtype
 
@@ -167,10 +190,14 @@ This document contains no actions for IANA.
 
 # Security Considerations
 
-By design, a DUJ has no cryptographic protection.
-It is, by design, only as secure and the current common scenario where a service tells a user to manually type some data (the RRtype and Rdata values) into an interface run by the DNS operator.
+A DUJ has no cryptographic protection.
+It is, by design, only as secure and the current common scenario where a service tells a user to manually copy and paste some data (the RRtype and Rdata values) into an interface run by the DNS operator.
 
 When a service gives the user a DUJ string, the authenticity of the source of the DUJ string and the integrity of the DUJ string is only as strong as the user's connection to the service.
-When a user pastes or types a DUJ string to a DNS operator, the authenticity of the source of the DUJ string and the integrity of the DUUS is only as strong as the user's connection to the DNS operator.
+When a user pastes a DUJ string to a DNS operator, the authenticity of the source of the DUJ string and the integrity of the DUUS is only as strong as the user's connection to the DNS operator.
 
 --- back
+
+# Acknowledgements
+
+Andy Newton and Gavin Brown contributed to an early version of this draft.
