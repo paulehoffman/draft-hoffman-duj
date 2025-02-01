@@ -133,6 +133,7 @@ Rdata consists of one or more strings that holds the record's data.
 The strings are expressed in the same manner as the display format defined for the RRtype.
 If there is no data for the record, this is specified with an empty string ("").
 
+Note that the quoting of an Rdata string in the DUJ does not directly translate to how the DNS operator would copy the Rdata string to the zone.
 Some RRtypes require multiple character-strings, where "character-string" is defined in Section 5.1 of {{RFC1035}}.
 In such a case, each character-string is a separate JSON string.
 For example:
@@ -141,6 +142,8 @@ For example:
 [ "DUJ", [ ["add", "yourname.example", "WALLET", "ETH",
   "0xb775599c76b4672B0D820E3AA534F7cF9312c263"] ] ]
 ~~~
+
+However, when moving an Rdata using the format specified in {{RFC3597}}, the quotation marks in the DUJ are not copied.
 
 # Processing
 
