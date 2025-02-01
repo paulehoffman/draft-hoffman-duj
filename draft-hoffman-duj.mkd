@@ -90,8 +90,8 @@ If there is a reason to create a later version, the first string can be changed 
 An example of a DUJ string is:
 
 ~~~
-["DUJ", [["add", "mail.yourname.example", "TXT",
- "v=spf1 a:mail.yourname.example ip4:192.0.2.49"]]
+[ "DUJ", [ ["add", "mail.yourname.example", "TXT",
+ "v=spf1 a:mail.yourname.example ip4:192.0.2.49"] ] ]
 ~~~
 
 A DUJ string MUST be a JSON array with two values. The first value is the string "DUJ".
@@ -125,7 +125,7 @@ To specify an RRtype that is not yet in the registry, use the format specified i
 For example:
 
 ~~~
-["DUJ", [["add", "yourname.example", "TYPE4321", "\# 4 0A000001"]]
+["DUJ", [ ["add", "yourname.example", "TYPE4321", "\# 4 0A000001"] ] ]
 ~~~
 
 #Rdata
@@ -139,8 +139,8 @@ In such a case, each character-string is a separate JSON string.
 For example:
 
 ~~~
-["DUJ", [["add", "yourname.example", "WALLET", "ETH",
-  "0xb775599c76b4672B0D820E3AA534F7cF9312c263"]]
+[ "DUJ", [ ["add", "yourname.example", "WALLET", "ETH",
+  "0xb775599c76b4672B0D820E3AA534F7cF9312c263"] ] ]
 ~~~
 
 # Processing
