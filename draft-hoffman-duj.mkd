@@ -217,4 +217,11 @@ When a user pastes a DUJ string to a DNS operator, the authenticity of the sourc
 
 # Acknowledgements
 
-Andy Newton and Gavin Brown contributed to an early version of this draft.
+Andy Newton,
+Bob Harold,
+Gavin Brown,
+John Levine,
+Libor Peltan,
+and
+Robert Edmonds
+contributed substantial comments to early versions of this draft.
