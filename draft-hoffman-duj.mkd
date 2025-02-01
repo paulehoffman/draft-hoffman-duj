@@ -63,7 +63,7 @@ Because DUJ strings contain quoted text, and some typing systems might automatic
 
 Different, more elaborate protocols for automatic updates, may be proposed separately.
 For example, DomainConnect ({{DomainConnect}}, {{I-D.kowalik-domainconnect}}) defines an automated protocol that includes user affirmation before updates.
-DUJ is purposely more limited and less less ambitious than those protocols, with the assumption that it will be much easier to deploy.
+DUJ is purposely more limited and less ambitious than those protocols, with the assumption that it will be much easier to deploy.
 Service providers might allow manual updates as they do today, manual updates by DUJ, and automated updates with a protocol like DomainConnect.
 
 ## DUJ Design {#design}
@@ -95,7 +95,7 @@ An example of a DUJ string is:
 ~~~
 
 A DUJ string MUST be a JSON array with two values. The first value is the string "DUJ".
-The second value is a an array, called the "update array", which lists all the updates.
+The second value is an array, called the "update array", which lists all the updates.
 The update array MUST have a length of at least 1.
 
 The arrays in the update array are called "action templates".
