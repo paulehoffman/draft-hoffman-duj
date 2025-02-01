@@ -148,8 +148,8 @@ The strings are expressed in the same manner as the display format defined for t
 If there is no data for the record, this is specified with an empty string ("").
 
 Note that the quoting of an Rdata string in the DUJ does not directly translate to how the DNS operator would copy the Rdata string to the zone.
-Some RRtypes require multiple character-strings, where "character-string" is defined in Section 5.1 of {{RFC1035}}.
-In such a case, each character-string is a separate JSON string.
+Some RRtypes require multiple &lt;character-string&gt;s, where "&lt;character-string&gt;" is defined in Section 5.1 of {{RFC1035}}.
+In such a case, each &lt;character-string&gt; is a separate JSON string.
 For example:
 
 ~~~
