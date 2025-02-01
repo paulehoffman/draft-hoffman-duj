@@ -1,7 +1,7 @@
 ---
 title: DNS Update with JSON
 abbrev: DNS Update with JSON
-docname: draft-hoffman-duj-00
+docname: draft-hoffman-duj-01
 ipr: trust200902
 submissiontype: IETF
 cat: std
