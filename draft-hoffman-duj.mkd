@@ -109,6 +109,16 @@ The action string MUST be either "add" or "delete"; no other values are allowed.
 ## FQDN
 
 The FQDN is a string that is a fully-qualified domain name.
+The action is taken on the domain name in the FQDN.
+
+For example, given the following:
+
+~~~
+["DUJ", [ ["add", "_443._tcp.www.example.com", "TLSA", "0 0 1
+  d2abde240d7cd3ee6b4b28c54df034b97983a1d16e8a410e4561cb106618e971" ] ] ]
+~~~
+
+The TLSA record would be added to the zone "_443._tcp.www.example.com" if all the requirements in {{processing}} are met.
 
 Note that the FQDN might be a zone that does not yet exist because it is being created by an "add" action.
 A common example of this is adding an "underscore name" {{RFC8552}} such as "_smimecert" and "_xmpp".
@@ -145,7 +155,7 @@ For example:
 
 However, when moving an Rdata using the format specified in {{RFC3597}}, the quotation marks in the DUJ are not copied.
 
-# Processing
+# Processing {#processing}
 
 This section defines rules for DNS operators who allow updates with DUJ to process DUJ strings they receive.
 

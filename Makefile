@@ -2,7 +2,7 @@ SOURCE = draft-hoffman-duj
 all: $(SOURCE).xml $(SOURCE).txt
 
 $(SOURCE).txt:	$(SOURCE).xml
-	xml2rfc $(SOURCE).xml -n --html --text
+	xml2rfc --quiet -n --html $(SOURCE).xml
 
 $(SOURCE).xml:	$(SOURCE).mkd
 	kramdown-rfc $(SOURCE).mkd >$(SOURCE).new.xml
