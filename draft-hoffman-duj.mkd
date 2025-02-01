@@ -102,6 +102,8 @@ A DUJ string MUST be a JSON array with two values. The first value is the string
 The second value is an array, called the "update array", which lists all the updates.
 The update array MUST have a length of at least 1.
 
+DUJ strings MUST NOT include zone file comments or directives.
+
 The arrays in the update array are called "action templates".
 Every action template is an array of at least four values: "action", "FQDN", "RRtype", and "Rdata".
 
