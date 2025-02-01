@@ -109,7 +109,6 @@ The action string MUST be either "add" or "delete"; no other values are allowed.
 ## FQDN
 
 The FQDN is a string that is a fully-qualified domain name.
-The FQDN string MUST NOT have a trailing period.
 
 Note that the FQDN might be a zone that does not yet exist because it is being created by an "add" action.
 A common example of this is adding an "underscore name" {{RFC8552}} such as "_smimecert" and "_xmpp".
@@ -168,7 +167,6 @@ The DNS operator MUST not process any DUJ string where any of the following rule
   - There MUST be four or more elements
   - The action element MUST be either the exact string "add" or "delete"
   - The FQDN MUST be a valid fully-qualified domain name
-  - The FQDN MUST NOT end with "."
   - The FQDN MUST NOT contain a wildcard
   - The RRtype MUST be recognized, or be in the format specified in {{RFC3597}}
   - The Rdata MUST be appropriate for the given RRtype
