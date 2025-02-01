@@ -129,7 +129,7 @@ For example:
 
 #Rdata
 
-Rdata consists of one or more strings that with the record's data.
+Rdata consists of one or more strings that holds the record's data.
 The strings are expressed in the same manner as the display format defined for the RRtype.
 If there is no data for the record, this is specified with an empty string ("").
 
