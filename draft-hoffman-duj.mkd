@@ -26,7 +26,7 @@ informative:
     title: DomainConnect
     target: https://www.domainconnect.org/
     date: false
-  TYPES-REGISTRY:
+  Types-registry:
     title: Domain Name System (DNS) Parameters
     target: https://www.iana.org/assignments/dns-parameters/
     date: false
@@ -134,7 +134,7 @@ The FQDN MUST NOT contain a wildcard.
 ## RRtype
 
 The RRtype is a string with the name of the resource record type for the action.
-The RRtype's name is given in the "TYPE" column of the "Resource Record (RR) TYPEs" IANA registry {{TYPES-REGISTRY}}.
+The RRtype's name is given in the "TYPE" column of the "Resource Record (RR) TYPEs" IANA registry {{Types-registry}}.
 
 To specify an RRtype that is not yet in the registry, use the format specified in {{RFC3597}}.
 For example:
