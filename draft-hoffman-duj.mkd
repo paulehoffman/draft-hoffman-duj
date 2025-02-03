@@ -79,9 +79,16 @@ This is to prevent key-value pairs to be added that might cause users or operato
 For example, it is not possible to include comments in a DUJ string such as "For DKIM".
 The reason for this is that such comments could be used by an attacker to convince a user to make a change that they otherwise might not by adding a comment such as "Urgent security update".
 
-Another design goal is that the DUJ string is readable by the user.
+DUJ strings are meant to be somewhate readable by the user.
 They might not understand what it says, but if they understand something about the DNS, they might.
 For example, you might see that a particular RRtype and Rdata are proposed to be added to your zone by looking at the DUJ string you are presented.
+This is the reason that the DUJ string is not "protected" by encoding it with something like Base64.
+
+DUJ strings should not be difficult for a service to create.
+There are cases described later where the quoting on the Rtype field can be tricky, but forcing an application to understand backslash quoting and apply it correctly is consdered out of scope for a format this is only meant to replace human-readable instructions like "enter this record into your zone".
+
+This document assumes that the application service will have looked in the user's zone before suggesting a zone update.
+That would likely be true in the current use case where the application service suggests an update to the user's zone.
 
 Another explicit design for DUJ is that it is not extensible.
 If there is a reason to create a later version, the first string can be changed to one that includes a new version identifier.
@@ -145,7 +152,7 @@ For example:
 ["DUJ", [ ["add", "yourname.example", "TYPE4321", "\# 4 0A000001"] ] ]
 ~~~
 
-#Rdata
+## Rdata
 
 Rdata consists of one or more strings that holds the record's data.
 The strings are expressed in the same manner as the display format defined for the RRtype.
