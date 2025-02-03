@@ -59,6 +59,7 @@ DUJ is not intended for any automatic zone updates.
 
 DUJ is intended only for users who copy-and-paste.
 DUJ strings can be typed by users, but doing so can easily introduce errors that might negatively affect their DNS zone.
+There is no intention in the design for the user to change the text in a DUJ string.
 Because DUJ strings contain quoted text, and some typing systems might automatically unhelpfully convert quotation marks into "smart quotes", for some users typing DUJ strings might be impossible.
 
 Different, more elaborate protocols for automatic updates, may be proposed separately.
@@ -223,6 +224,7 @@ Bob Harold,
 Gavin Brown,
 John Levine,
 Libor Peltan,
+Pawel Kowalik,
 and
 Robert Edmonds
 contributed substantial comments to early versions of this draft.
