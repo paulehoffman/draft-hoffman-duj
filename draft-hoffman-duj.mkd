@@ -176,7 +176,8 @@ This section defines rules for DNS operators who allow updates with DUJ to proce
 
 The update array is an ordered list of action templates.
 The DNS operator MUST process each action template in the order it appears in the update array.
-However, the DNS operator does so only after verifying all the contents of the DUJ string.
+However, the DNS operator does so only after after verifying that the entire DUJ string can be atomically applied to the target zone.
+The DNS operator MUST NOT process any action within the DUJ if any action would prevent the atomic application of the entire DUJ string.
 
 The DNS operator SHOULD be able to handle {{RFC3597}} RRtypes.
 However, they may have a local policy to not allow users to add or delete unknown RRtypes.
