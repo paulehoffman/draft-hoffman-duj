@@ -122,35 +122,35 @@ The second value is an array, called the "update array", which lists all the upd
 The update array MUST have a length of at least 1.
 
 The arrays in the update array are called "action templates".
-Every action template is exactly two values: "action" and "zone-data".
+Every action template is exactly two values: "action" and "record-data".
 
 The action is a string specifying the action to be taken.
 The action string MUST be either "add" or "delete"; no other values are allowed.
 
-The zone-data is a string that is in the zone file format defined in {{RFC1035}}.
-The zone-data MAY contain class names, as described in {{RFC1035}}.
-The zone-data MAY contain time-to-live (TTL) values, as described in {{RFC1035}}.
+The record-data is a string that is in the zone file format defined in {{RFC1035}}.
+The record-data MAY contain class names, as described in {{RFC1035}}.
+The record-data MAY contain time-to-live (TTL) values, as described in {{RFC1035}}.
 
 ## DUJS
 
-The zone-data in DUJS strings MUST NOT include zone file comments, directives, or embedded newlines from {{RFC1035}}.
-The zone-data in DUJS stings MAY contain \DDD and \X escapes, and parentheses, from {{RFC1035}}.
+The record-data in DUJS strings MUST NOT include zone file comments, directives, or embedded newlines from {{RFC1035}}.
+The record-data in DUJS stings MAY contain \DDD and \X escapes, and parentheses, from {{RFC1035}}.
 
 ## DUJ64
 
-A DUJ64 string is identical to a DUJS string except that the zone-data in a DUJ64 string is the Base64 {{RFC4648}} encoding of he zone-data that would have gone into a DUJS string.
+A DUJ64 string is identical to a DUJS string except that the record-data in a DUJ64 string is the Base64 {{RFC4648}} encoding of he record-data that would have gone into a DUJS string.
 
 ## Notes on Owner Names
 
-The owner name of a zone in a zone-data string might be a zone that does not yet exist because it is being created by an "add" action.
+The owner name of a zone in a record-data string might be a name that does not yet exist because it is being created by an "add" action.
 A common example of this is adding an "underscore name" {{RFC8552}} such as "_smimecert" and "_xmpp".
-A DNS operator would have to determine whether the full owner name given in the zone-data could be created, which might not be possible due to zone cuts.
+A DNS operator would have to determine whether the full owner name given in the record-data could be created, which might not be possible due to zone cuts.
 
 The owner-name MUST NOT contain a wildcard.
 
 ## Notes on RRtypes
 
-The RRtype in the zone-data with the name of the resource record type for the action.
+The RRtype in the record-data with the name of the resource record type for the action.
 The RRtype's name is given in the "TYPE" column of the "Resource Record (RR) TYPEs" IANA registry {{Types-registry}}.
 
 To specify an RRtype that is not yet in the registry, use the format specified in {{RFC3597}}.
@@ -226,6 +226,7 @@ Gavin Brown,
 John Levine,
 Libor Peltan,
 Pawel Kowalik,
+Peter Tomassen,
 and
 Robert Edmonds
 contributed substantial comments to early versions of this draft.
