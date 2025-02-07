@@ -1,7 +1,7 @@
 ---
 title: DNS Update with JSON
 abbrev: DNS Update with JSON
-docname: draft-hoffman-duj-01
+docname: draft-hoffman-duj-02
 ipr: trust200902
 submissiontype: IETF
 cat: std
@@ -15,6 +15,7 @@ author:
 
 normative:
   RFC1035:
+  RFC4648:
   RFC3597:
   RFC7493:
 
@@ -58,7 +59,10 @@ DUJ is specifically targeted at improving the current common scenario of a user 
 DUJ is not intended for any automatic zone updates.
 
 DUJ is intended only for users who copy-and-paste.
-DUJ strings can be typed by users, but doing so can easily introduce errors that might negatively affect their DNS zone.
+There are two types of DUJ strings: DUJS and DUJ64.
+DUJS strings can be typed by users, but doing so can easily introduce errors that might negatively affect their DNS zone.
+DUJ64 strings cannot be safely typed by users.
+
 There is no intention in the design for the user to change the text in a DUJ string.
 Because DUJ strings contain quoted text, and some typing systems might automatically unhelpfully convert quotation marks into "smart quotes", for some users typing DUJ strings might be impossible.
 
@@ -79,10 +83,12 @@ This is to prevent key-value pairs to be added that might cause users or operato
 For example, it is not possible to include comments in a DUJ string such as "For DKIM".
 The reason for this is that such comments could be used by an attacker to convince a user to make a change that they otherwise might not by adding a comment such as "Urgent security update".
 
-DUJ strings are meant to be somewhat readable by the user.
+DUJS strings are meant to be somewhat readable by the user.
 They might not understand what it says, but if they understand something about the DNS, they might.
 For example, you might see that a particular RRtype and Rdata are proposed to be added to your zone by looking at the DUJ string you are presented.
-This is the reason that the DUJ string is not "protected" by encoding it with something like Base64.
+
+DUJ64 strings are purposely not readable by the user.
+However, the user can still see if records are being added or deleted.
 
 DUJ strings should not be difficult for a service to create.
 There are cases described later where the quoting on the Rdata field can be tricky, but forcing an application to understand backslash quoting and apply it correctly is considered out of scope for a format this is only meant to replace human-readable instructions like "enter this record into your zone".
@@ -91,7 +97,7 @@ This document assumes that the application service will have looked in the user'
 That would likely be true in the current use case where the application service suggests an update to the user's zone.
 
 Another explicit design for DUJ is that it is not extensible.
-If there is a reason to create a later version, the first string can be changed to one that includes a new version identifier.
+If there is a reason to create a later version, the first string ("DJUS" or "DUJ64") can be changed to one that includes a new version identifier.
 
 ## BCP 14 Language
 
@@ -99,76 +105,60 @@ If there is a reason to create a later version, the first string can be changed 
 
 # Specification
 
-An example of a DUJ string is:
+An example of a DUJS string is:
 
 ~~~
-[ "DUJ", [ ["add", "mail.yourname.example", "TXT",
- "v=spf1 a:mail.yourname.example ip4:192.0.2.49"] ] ]
+[ "DUJS", [ ["add", "mail.yourname.example TXT \"v=spf1 a:mail.yourname.example ip4:192.0.2.49\""] ] ]
 ~~~
 
-A DUJ string MUST be a JSON array with two values. The first value is the string "DUJ".
+An example of a DUJS string is:
+
+~~~
+[ "DUJ64", [ ["add", "bWFpbC55b3VybmFtZS5leGFtcGxlIFRYVCAidj1zcGYxIGE6bWFpbC55b3VybmFtZS5leGFtcGxlIGlwNDoxOTIuMC4yLjQ5Ig=="] ] ]
+~~~
+
+A DUJ string MUST be a JSON array with two values. The first value is the string "DUJS" or "DUJ64".
 The second value is an array, called the "update array", which lists all the updates.
 The update array MUST have a length of at least 1.
 
-DUJ strings MUST NOT include zone file comments, directives, parentheses or embedded newlines from {{RFC1035}}.
-DUJ Rdata stings MAY contain \DDD and \X escapes from {{RFC1035}}; other strings MUST NOT contain those escapes.
-
 The arrays in the update array are called "action templates".
-Every action template is an array of at least four values: "action", "FQDN", "RRtype", and "Rdata".
-
-## Action
+Every action template is exactly two values: "action" and "zone-data".
 
 The action is a string specifying the action to be taken.
 The action string MUST be either "add" or "delete"; no other values are allowed.
 
-## FQDN
+The zone-data is a string that is in the zone file format defined in {{RFC1035}}.
+The zone-data MAY contain class names, as described in {{RFC1035}}.
+The zone-data MAY contain time-to-live (TTL) values, as described in {{RFC1035}}.
 
-The FQDN is a string that is a fully-qualified domain name.
-The action is taken on the domain name in the FQDN.
+## DUJS
 
-For example, given the following:
+The zone-data in DUJS strings MUST NOT include zone file comments, directives, or embedded newlines from {{RFC1035}}.
+The zone-data in DUJS stings MAY contain \DDD and \X escapes, and parentheses, from {{RFC1035}}.
 
-~~~
-["DUJ", [ ["add", "_443._tcp.www.example.com", "TLSA", "0 0 1
-  d2abde240d7cd3ee6b4b28c54df034b97983a1d16e8a410e4561cb106618e971" ] ] ]
-~~~
+## DUJ64
 
-The TLSA record would be added to the zone "_443._tcp.www.example.com" if all the requirements in {{processing}} are met.
+A DUJ64 string is identical to a DUJS string except that the zone-data in a DUJ64 string is the Base64 {{RFC4648}} encoding of he zone-data that would have gone into a DUJS string.
 
-Note that the FQDN might be a zone that does not yet exist because it is being created by an "add" action.
+## Notes on Owner Names
+
+The owner name of a zone in a zone-data string might be a zone that does not yet exist because it is being created by an "add" action.
 A common example of this is adding an "underscore name" {{RFC8552}} such as "_smimecert" and "_xmpp".
+A DNS operator would have to determine whether the full owner name given in the zone-data could be created, which might not be possible due to zone cuts.
 
-The FQDN MUST NOT contain a wildcard.
+The owner-name MUST NOT contain a wildcard.
 
-## RRtype
+## Notes on RRtypes
 
-The RRtype is a string with the name of the resource record type for the action.
+The RRtype in the zone-data with the name of the resource record type for the action.
 The RRtype's name is given in the "TYPE" column of the "Resource Record (RR) TYPEs" IANA registry {{Types-registry}}.
 
 To specify an RRtype that is not yet in the registry, use the format specified in {{RFC3597}}.
 For example:
 
 ~~~
-["DUJ", [ ["add", "yourname.example", "TYPE4321", "\# 4 0A000001"] ] ]
+["DUJS", [ ["add", "yourname.example TYPE4321 \# 4 0A000001"] ] ]
 ~~~
-
-## Rdata
-
-Rdata consists of one or more strings that holds the record's data.
-The strings are expressed in the same manner as the display format defined for the RRtype.
-If there is no data for the record, this is specified with an empty string ("").
-
-Note that the quoting of an Rdata string in the DUJ does not directly translate to how the DNS operator would copy the Rdata string to the zone.
-Some RRtypes require multiple &lt;character-string&gt;s, where "&lt;character-string&gt;" is defined in Section 5.1 of {{RFC1035}}.
-In such a case, each &lt;character-string&gt; is a separate JSON string.
-For example:
-
-~~~
-[ "DUJ", [ ["add", "yourname.example", "WALLET", "ETH",
-  "0xb775599c76b4672B0D820E3AA534F7cF9312c263"] ] ]
-~~~
-
-However, when moving an Rdata using the format specified in {{RFC3597}}, the quotation marks in the DUJ are not copied.
 
 # Processing {#processing}
 
@@ -178,6 +168,9 @@ The update array is an ordered list of action templates.
 The DNS operator MUST process each action template in the order it appears in the update array.
 However, the DNS operator does so only after after verifying that the entire DUJ string can be atomically applied to the target zone.
 The DNS operator MUST NOT process any action within the DUJ if any action would prevent the atomic application of the entire DUJ string.
+
+The DNS operator MAY choose to skip an "add" action if it would create a record that is already in the zone.
+The DNS operator MAY choose to skip a "delete" action if it would delete a record that did not exist in the zone.
 
 The DNS operator SHOULD be able to handle {{RFC3597}} RRtypes.
 However, they may have a local policy to not allow users to add or delete unknown RRtypes.
@@ -190,7 +183,7 @@ If the DUJ was received from a user interface, the DNS operator SHOULD clearly d
 The DNS operator MUST not process any DUJ string where any of the following rules are not met:
 
 - The DUJ string MUST be valid I-JSON.
-- The first element of the DUJ string MUST be "DUJ".
+- The first element of the DUJ string MUST be "DUJS" or "DUJ64.
 - The update array MUST have at least one action template.
 - Every action template MUST meet the following rules:
   - There MUST be four or more elements
