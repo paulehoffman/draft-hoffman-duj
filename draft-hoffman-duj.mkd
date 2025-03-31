@@ -127,6 +127,9 @@ Every action template is exactly two values: "action" and "record-data".
 The action is a string specifying the action to be taken.
 The action string MUST be either "add" or "delete"; no other values are allowed.
 
+\*\* There was a suggestion that each action string be followed by a list of record-data for that action.
+For example, to add two records, there would be only one action template of "add", which has two records. \*\*
+
 The record-data is a string that is in the zone file format defined in {{RFC1035}}.
 The record-data MAY contain class names, as described in {{RFC1035}}.
 The record-data MAY contain time-to-live (TTL) values, as described in {{RFC1035}}.
@@ -166,7 +169,7 @@ This section defines rules for DNS operators who allow updates with DUJ to proce
 
 The update array is an ordered list of action templates.
 The DNS operator MUST process each action template in the order it appears in the update array.
-However, the DNS operator does so only after after verifying that the entire DUJ string can be atomically applied to the target zone.
+However, the DNS operator does so only after verifying that the entire DUJ string can be atomically applied to the target zone.
 The DNS operator MUST NOT process any action within the DUJ if any action would prevent the atomic application of the entire DUJ string.
 
 The DNS operator MAY choose to skip an "add" action if it would create a record that is already in the zone.
@@ -175,7 +178,7 @@ The DNS operator MAY choose to skip a "delete" action if it would delete a recor
 The DNS operator SHOULD be able to handle {{RFC3597}} RRtypes.
 However, they may have a local policy to not allow users to add or delete unknown RRtypes.
 
-A DNS operator MAY reject any DUJ string for any reason.
+A DNS operator MAY reject any DUJ string for any reason, such as if it adds and then deletes the same record.
 If the DUJ was received from a user interface, the DNS operator SHOULD clearly describe why a DUJ was rejected.
 
 ## String Verification
@@ -186,7 +189,6 @@ The DNS operator MUST not process any DUJ string where any of the following rule
 - The first element of the DUJ string MUST be "DUJS" or "DUJ64.
 - The update array MUST have at least one action template.
 - Every action template MUST meet the following rules:
-  - There MUST be four or more elements
   - The action element MUST be either the exact string "add" or "delete"
   - The FQDN MUST be a valid fully-qualified domain name
   - The FQDN MUST NOT contain a wildcard
@@ -211,10 +213,10 @@ This document contains no actions for IANA.
 # Security Considerations
 
 A DUJ has no cryptographic protection.
-It is, by design, only as secure and the current common scenario where a service tells a user to manually copy and paste some data (the RRtype and Rdata values) into an interface run by the DNS operator.
+It is, by design, only as secure as the current common scenario where a service tells a user to manually copy and paste some data (the RRtype and Rdata values) into an interface run by the DNS operator.
 
 When a service gives the user a DUJ string, the authenticity of the source of the DUJ string and the integrity of the DUJ string is only as strong as the user's connection to the service.
-When a user pastes a DUJ string to a DNS operator, the authenticity of the source of the DUJ string and the integrity of the DUUS is only as strong as the user's connection to the DNS operator.
+When a user pastes a DUJ string to a DNS operator, the authenticity of the source of the DUJ string and the integrity of the DUJS is only as strong as the user's connection to the DNS operator.
 
 --- back
 
@@ -223,6 +225,7 @@ When a user pastes a DUJ string to a DNS operator, the authenticity of the sourc
 Andy Newton,
 Bob Harold,
 Gavin Brown,
+Jasdip Singh,
 John Levine,
 Libor Peltan,
 Pawel Kowalik,
