@@ -1,7 +1,7 @@
 ---
 title: DNS Update with JSON
 abbrev: DNS Update with JSON
-docname: draft-hoffman-duj-03
+docname: draft-hoffman-duj-04
 ipr: trust200902
 submissiontype: IETF
 cat: std
@@ -57,8 +57,8 @@ Using DUJ makes the update process more reliable for DNS operators and their use
 
 DUJ is specifically targeted at improving the current common scenario of a user being told by an application service or a helpful friend to modify their DNS zone.
 DUJ is not intended for any automatic zone updates.
-
 DUJ is intended only for users who copy-and-paste.
+
 There are two types of DUJ strings: DUJS and DUJ64.
 DUJS strings can be typed by users, but doing so can easily introduce errors that might negatively affect their DNS zone.
 DUJ64 strings cannot be safely typed by users.
@@ -99,6 +99,10 @@ That would likely be true in the current use case where the application service 
 Another explicit design for DUJ is that it is not extensible.
 If there is a reason to create a later version, the first string ("DJUS" or "DUJ64") can be changed to one that includes a new version identifier.
 
+During the development of DUJ, there was a suggestion that each action string be followed by a list of record-data for that action.
+For example, to add two records, there would be only one action template of "add", which has two records.
+This suggested was rejected because it complicates the processing while saving only a tiny amount of space.
+
 ## BCP 14 Language
 
 {::boilerplate bcp14-tagged}
@@ -126,9 +130,6 @@ Every action template is exactly two values: "action" and "record-data".
 
 The action is a string specifying the action to be taken.
 The action string MUST be either "add" or "delete"; no other values are allowed.
-
-\*\* There was a suggestion that each action string be followed by a list of record-data for that action.
-For example, to add two records, there would be only one action template of "add", which has two records. \*\*
 
 The record-data is a string that is in the zone file format defined in {{RFC1035}}.
 The record-data MAY contain class names, as described in {{RFC1035}}.
@@ -186,7 +187,7 @@ If the DUJ was received from a user interface, the DNS operator SHOULD clearly d
 The DNS operator MUST not process any DUJ string where any of the following rules are not met:
 
 - The DUJ string MUST be valid I-JSON.
-- The first element of the DUJ string MUST be "DUJS" or "DUJ64.
+- The first element of the DUJ string MUST be "DUJS" or "DUJ64".
 - The update array MUST have at least one action template.
 - Every action template MUST meet the following rules:
   - The action element MUST be either the exact string "add" or "delete"
@@ -200,7 +201,7 @@ The DNS operator MUST not process any DUJ string where any of the following rule
 After verifying the DUJ string, the DNS operator processes each action template in order.
 When processing an action template, the DNS operator MUST verify:
 
-- that the  user is authorized to change the zone named in the FQDN
+- that the user is authorized to change the zone named in the FQDN
 - that, for "delete" actions, that the exact record described in the action template exists
 - that, for "add" actions, that the exact record described in the action template does not already exist
 
